@@ -304,3 +304,67 @@ Allí debe existir `datos/bronce/Konzerta 08-oct-2026.xlsx`. Al ejecutar todas l
 ---
 
 **Resumen en una frase:** el notebook transforma y documenta los datos de Konzerta mediante las capas bronce, plata y oro; el dashboard consume exclusivamente la capa oro para explorar cinco preguntas sobre las ofertas de empleo.
+
+
+## 12. Recomendaciones de cambios a partir de los documentos del equipo
+
+Esta sección distingue **requisitos obligatorios** (PDF actualizado del profesor: `Proyecto final Introducción a la Programación para Ciencia de Datos (1).pdf`) de **recomendaciones de trabajo** (documento `Guia_paso_a_paso_Proyecto_Konzerta_Equipo.docx`, versión 24/10/2026). El objetivo es que cada integrante entienda qué se sugirió, qué se incorporó y qué debe verificarse. **No se atribuyen al profesor requisitos que solo figuran en la guía del compañero.**
+
+### 12.1. Matriz de recomendaciones y estado
+
+| Fuente | Recomendación o requisito | Situación en nuestro proyecto | Acción pendiente |
+|---|---|---|---|
+| Profesor | Conservar el Excel sin modificar en bronce | El notebook lee `datos/bronce` y transforma una copia | Comprobar integridad del archivo en la entrega |
+| Profesor | Normalizar tipos, textos, faltantes, duplicados y atípicos; justificar decisiones | Se implementó limpieza y bitácora de cuatro campos | Revisar si las categorías equivalentes requieren unificación adicional; validar reglas con la fuente |
+| Guía del equipo | Bitácora simplificada de dos columnas: Columna y Justificación | El notebook conserva cuatro columnas, que aportan trazabilidad | Si el equipo desea el formato de la guía, crear una **vista resumida** sin perder el registro detallado. El PDF del profesor exige justificación, pero no impone dos columnas |
+| Profesor | Al menos dos tablas oro y cinco gráficos que cuenten una historia | Hay seis tablas oro y cinco secciones del dashboard | Verificar gráficos, títulos, ejes, unidades e interpretaciones con los CSV reales |
+| Profesor | Dashboard alimentado solo por oro y actualizable al reejecutar el pipeline | Streamlit solo lee oro; el notebook exporta las tablas | Demostrar actualización de datos en el entorno de entrega, sin editar cifras a mano |
+| Guía del equipo | Repartir preguntas en bloques A/B/C, limpiar e integrar entre los tres | Las cinco preguntas están implementadas en un notebook | Acordar responsables, revisión cruzada y comprobar que los tres entienden todas las secciones |
+| Profesor | Diccionario de datos, fuente, fecha y README para ejecutar | Hay diccionario en notebook y guía técnica en README | Confirmar fecha de obtención y trasladar hallazgos, conclusiones y aprendizajes definitivos al material de entrega |
+| Profesor | Grabación colaborativa de al menos una hora, con los tres integrantes, enlazada en README | No se ha verificado la grabación ni su enlace | Grabar, comprobar permisos y añadir URL al README |
+| Profesor | Presentación/defensa de 30 minutos, demostración en vivo y defensa individual | El README explica el funcionamiento, pero no reemplaza el ensayo | Preparar presentación, demostración y respuestas individuales |
+| Profesor | ZIP grupal ejecutable en otra computadora | Existe estructura del proyecto y `requirements.txt` | Probar el ZIP descomprimido en otra ruta y, de ser posible, en Mac y Windows |
+
+### 12.2. Cambios recomendados al notebook y al dashboard
+
+**Prioridad alta — antes de la entrega**
+
+1. **Verificar la ejecución completa:** ejecutar todas las celdas del notebook desde cero, confirmar los cuatro CSV de plata, los seis CSV de oro y las validaciones finales. El código guardado en GitHub no equivale a una ejecución comprobada.
+2. **Validar los datos geográficos:** revisar las filas clasificadas como `Otra` y `Sin dato` antes de interpretar la distribución provincial. No asignar provincias sin evidencia en `localidad`.
+3. **Revisar la fecha de extracción:** el nombre del Excel menciona 08-oct-2026, mientras que la portada consigna 16-oct-2026. Confirmar la fecha válida en los metadatos o en el procedimiento de obtención y ajustar el análisis temporal si corresponde.
+4. **Verificar filtros y descargas del dashboard:** comprobar que cada filtro afecta solo las secciones que pueden calcularse con las dimensiones de oro y que las tablas exportadas coinciden con lo mostrado.
+5. **Revisar la presentación de los gráficos:** todos deben incluir títulos claros, ejes y unidades cuando correspondan, y una interpretación breve basada en resultados realmente observados. Organizar la exposición en contexto → hallazgos → conclusión.
+6. **Comprobar actualización automática:** modificar de manera controlada una copia del Excel de prueba, reejecutar el pipeline y verificar que los CSV oro y el dashboard cambian sin edición manual. Restaurar después los datos originales.
+
+**Prioridad media — mejorar la comprensión y defensa**
+
+7. Añadir al informe o presentación una comparación concreta **antes/después**: dimensiones, tipos, faltantes y ejemplos de normalización, obtenidos de los perfiles bronce y plata.
+8. Explicar por qué se conservan nulos numéricos y por qué los salarios atípicos se marcan para revisión en lugar de eliminarlos automáticamente.
+9. Explicar la diferencia entre **ofertas** (anuncios) y **vacantes** (plazas declaradas), y que la muestra salarial con experiencia es muy pequeña.
+10. Preparar una reflexión personal de cada integrante sobre dificultades, decisiones y aprendizajes, sin inventar resultados de pruebas no realizadas.
+
+### 12.3. Organización sugerida por la guía del compañero
+
+La guía del 24 de octubre propone distribuir el trabajo así, **como sugerencia, no como exigencia del profesor**:
+
+- **Bloque A:** preguntas 1 y 4 — áreas, vacantes, geografía y nivel laboral; revisa el bloque B.
+- **Bloque B:** preguntas 3 y 5 — modalidades y evolución semanal; revisa el bloque C.
+- **Bloque C:** pregunta 2 — salarios y experiencia, además de calidad de datos; revisa el bloque A.
+
+La limpieza inicial, la integración, las pruebas y la preparación de la defensa deben ser colaborativas. La guía propone una **primera versión completa el 28/10/2026**, como fecha interna; el PDF actualizado fija la **presentación para el 07/11/2026**.
+
+### 12.4. Aclaración sobre versiones de los documentos
+
+Para evitar confusiones durante la defensa:
+
+- **Duración de la defensa:** el PDF actualizado del profesor indica **30 minutos**, aunque la guía del equipo mencione 20.
+- **Rúbrica:** el PDF actualizado distribuye **50 puntos para el trabajo y 50 para la sustentación**; la guía del equipo reproduce una distribución diferente. Usar la rúbrica actualizada.
+- **Carpetas:** el PDF actualizado pide explícitamente `datos/bronce`, `datos/plata`, `datos/oro`, `notebooks` y `reporte` o `dashboard`; nuestra estructura sigue ese esquema.
+- **Enlace a la grabación:** el PDF actualizado solicita incluirlo en el **README**. Puede repetirse en la presentación para facilitar el acceso, pero no debe faltar en el README.
+
+### 12.5. Información pendiente para cerrar la documentación
+
+**Enlace a la grabación colaborativa:** pendiente de añadir y verificar.  
+**Hallazgos definitivos:** actualizar con las cifras de la última ejecución validada.  
+**Conclusiones y aprendizajes personales:** completar y revisar entre los tres integrantes.  
+**Evidencia de ejecución multiplataforma y demostración de actualización:** pendiente de documentar.
