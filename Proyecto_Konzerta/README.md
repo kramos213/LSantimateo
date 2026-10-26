@@ -1,222 +1,113 @@
-# Proyecto Konzerta — Guía completa del análisis y dashboard
+# Proyecto Konzerta: análisis de ofertas laborales en Panamá
 
-> **Guía de lectura para integrantes del equipo:** este documento explica qué se construyó, cómo funciona, por qué se eligió cada herramienta, cómo reproducir el análisis y qué limitaciones deben mencionarse al exponerlo.
+**Asignatura:** Introducción a la Programación para Ciencia de Datos — Maestría en Ciencias de los Datos, UIP  
+**Integrantes:** Francia Vergara, Luis Santimateo y Yenia Rojas  
+**Fuente:** conjunto de anuncios de empleo de Konzerta, archivo `Konzerta 08-oct-2026.xlsx`  
+**Presentación prevista:** 7 de noviembre de 2026  
+**Guía técnica para integrantes:** [README_EQUIPO.md](README_EQUIPO.md)
 
-**Asignatura:** Introducción a la Programación para Ciencia de Datos  
-**Integrantes indicados en el notebook:** Francia Vergara, Luis Santimateo y Yenia Rojas  
-**Fuente:** [Konzerta](https://www.konzerta.com/)  
-**Archivo de entrada:** `Konzerta 08-oct-2026.xlsx`  
-**Fecha de obtención consignada en la portada:** 16 de octubre de 2026 (conviene cotejarla con el archivo original).
+## 1. Resumen del proyecto
 
-## 1. ¿Qué hicimos y para qué?
+Se desarrolló un pipeline reproducible en Python para analizar anuncios laborales del archivo Konzerta, desde los datos originales hasta seis tablas agregadas y un dashboard interactivo en Streamlit y Plotly. El proyecto responde preguntas sobre demanda profesional, salarios y experiencia, modalidades, distribución territorial y evolución semanal. La arquitectura medallón separa las capas bronce, plata y oro; el dashboard lee **exclusivamente** los CSV de la capa oro.
 
-Creamos un proyecto de análisis de anuncios de empleo publicados en Konzerta para estudiar cinco preguntas:
+**Alcance:** los resultados representan los anuncios del archivo analizado y no constituyen una estimación de todo el mercado laboral panameño.
 
-1. **Áreas y subáreas:** ¿qué perfiles profesionales concentran más anuncios y vacantes?
-2. **Salarios:** ¿cómo se relacionan los salarios informados con la experiencia requerida y el nivel laboral?
-3. **Modalidades:** ¿cuánto trabajo presencial, remoto o híbrido aparece en las distintas áreas?
-4. **Geografía:** ¿cómo se distribuyen los anuncios por ubicación, área y nivel laboral?
-5. **Tiempo:** ¿cómo cambia la cantidad de anuncios por semana entre julio y octubre de 2026, dentro del período observado?
+## 2. Objetivo general y preguntas de investigación
 
-El proyecto no consulta las ofertas en tiempo real: analiza un **archivo específico**. Cada fila representa un anuncio. **Un anuncio no equivale necesariamente a una vacante**: el campo `vacantes` registra cuántas plazas declara el anuncio.
+**Objetivo:** transformar datos reales de anuncios laborales en información consistente, verificable y explorable mediante un flujo automatizado de limpieza, análisis y visualización.
 
-La solución tiene dos productos: un **notebook de Jupyter** que prepara y analiza los datos y un **dashboard web con Streamlit** que presenta los resultados para explorarlos.
+Preguntas:
 
-## 2. Arquitectura: de datos crudos a gráficos
+1. ¿Qué áreas y subáreas concentran más anuncios y vacantes?
+2. ¿Qué relación descriptiva existe entre salarios informados, experiencia y nivel laboral?
+3. ¿Cómo se distribuyen las modalidades de trabajo por área?
+4. ¿Cómo se distribuyen los anuncios por ubicación, área y nivel laboral?
+5. ¿Cómo evolucionan semanalmente los anuncios en el período observado de julio a octubre de 2026?
 
-```text
-Excel original (BRONCE)
-        │
-        ▼
-Lectura y perfilado de calidad
-        │
-        ▼
-Normalización + bitácora (PLATA)
-        │
-        ▼
-Análisis exploratorio y agregaciones (ORO)
-        │
-        ▼
-Dashboard Streamlit + Plotly
-```
+## 3. Fuente y documentación de datos
 
-Esta organización se conoce como **arquitectura medallón**. Separa el dato de origen, el dato limpio y los resúmenes listos para visualización.
+| Elemento | Descripción |
+|---|---|
+| Procedencia | Datos de ofertas de empleo de Konzerta, archivo proporcionado para el proyecto académico |
+| Archivo original | `datos/bronce/Konzerta 08-oct-2026.xlsx` |
+| Fecha de obtención | 16/10/2026 según la portada del notebook; **pendiente de confirmar** frente al nombre del archivo |
+| Unidad de análisis | Un anuncio de empleo por fila |
+| Tipos de variables | Categóricas (área, provincia, modalidad), numéricas (vacantes, salario, experiencia) y fechas |
+| Confidencialidad | Uso académico; revisar el archivo antes de distribuirlo para confirmar ausencia de datos personales sensibles |
 
-| Capa | Qué contiene | Por qué se usa |
+**Diccionario de datos (campos principales, verificar contra la fuente antes de la entrega):**
+
+| Columna | Tipo esperado | Descripción |
 |---|---|---|
-| **Bronce** | Excel original sin modificar | Permite regresar a la fuente y repetir el análisis |
-| **Plata** | Datos estandarizados, bitácora y perfiles de calidad | Hace explícitas las decisiones de limpieza |
-| **Oro** | Seis tablas agregadas | Evita que el dashboard repita la limpieza o lea el Excel |
+| `id` | Identificador | Código del anuncio |
+| `area`, `subarea` | Texto | Clasificación profesional |
+| `provincia`, `localidad` | Texto | Ubicación declarada |
+| `modalidad` | Texto | Modalidad laboral |
+| `nivel_laboral` | Texto | Nivel requerido |
+| `vacantes` | Número | Plazas declaradas por anuncio |
+| `salario_min`, `salario_max` | Número | Límites salariales publicados, cuando existen |
+| `experiencia_meses` | Número | Experiencia solicitada en meses |
+| `fecha_publicacion` | Fecha | Publicación del anuncio |
+| `fecha_finalizacion` | Fecha | Finalización declarada |
+| `extraido` | Fecha | Marca de extracción, si está presente |
 
-**Decisión importante:** el dashboard **solo lee los seis CSV de oro**. El notebook es responsable de generar y actualizar esos archivos. Por tanto, el dashboard no cambia cuando se modifica el Excel hasta que se vuelve a ejecutar el pipeline y se actualizan los CSV.
+El diccionario completo, con todas las columnas y tipos reales, debe generarse o adjuntarse a partir del archivo original.
 
-## 3. Estructura de carpetas
+## 4. Metodología: arquitectura medallón
+
+| Capa | Proceso | Evidencia |
+|---|---|---|
+| **Bronce** | Conservar el Excel original sin modificar y realizar el diagnóstico inicial | Excel y perfil previo |
+| **Plata** | Normalizar columnas, textos, tipos, fechas y números; revisar faltantes, duplicados y atípicos; registrar decisiones | `konzerta_limpio.csv`, `bitacora_limpieza.csv`, `perfil_bronce.csv`, `perfil_plata.csv` |
+| **Oro** | Crear agregaciones orientadas a las cinco preguntas | Seis CSV `oro_*.csv` |
+
+La limpieza conserva valores faltantes numéricos cuando no existe una base para imputarlos. Las categorías ausentes se etiquetan como `Sin dato`. Los salarios con posibles anomalías se identifican para revisión y no se eliminan indiscriminadamente.
+
+**Bitácora:** el notebook actual exporta una bitácora con `columna`, `problema`, `decision` y `filas_afectadas`. Antes de entregar, contrastar su formato con las indicaciones vigentes y la guía del equipo.
+
+## 5. Análisis y visualizaciones
+
+Las seis tablas oro son:
+
+| Archivo | Pregunta atendida |
+|---|---|
+| `oro_areas_subareas.csv` | Áreas y subáreas con más anuncios y vacantes |
+| `oro_salarios_experiencia.csv` | Salarios según experiencia |
+| `oro_salarios_nivel.csv` | Salarios según nivel laboral |
+| `oro_modalidades_area.csv` | Modalidades por área |
+| `oro_geografia.csv` | Ubicación, área y nivel laboral |
+| `oro_tendencia_semanal.csv` | Evolución semanal |
+
+El dashboard incluye cinco secciones: **Panorama, Modalidades, Geografía, Salarios y Tendencia**, con gráficos Plotly, indicadores, filtros según dimensiones disponibles, tablas y descargas CSV. Los filtros de ubicación no afectan salarios o tendencias porque esas tablas oro no contienen la dimensión provincial.
+
+**Interpretación preliminar y cautelas:** las comparaciones por áreas, modalidades y geografía describen la distribución de anuncios del archivo. El análisis salarial se basa en un subconjunto reducido de registros con información suficiente; no permite extrapolar conclusiones salariales a todo el mercado. Etiquetas como `Otra` o `Sin dato` no representan provincias oficiales. Las semanas iniciales o finales pueden ser parciales.
+
+**Hallazgos cuantitativos finales:** pendientes de incorporar tras la ejecución y validación de los CSV definitivos. No se incluyen cifras no verificadas en este README.
+
+## 6. Estructura y herramientas
 
 ```text
 Proyecto_Konzerta/
 ├── datos/
-│   ├── bronce/
-│   │   └── Konzerta 08-oct-2026.xlsx
-│   ├── plata/                     # generado por el notebook
-│   └── oro/                       # generado por el notebook
+│   ├── bronce/      # Excel original
+│   ├── plata/       # resultados de limpieza
+│   └── oro/         # seis CSV para dashboard
 ├── notebooks/
 │   └── Proyecto_Konzerta_KR.ipynb
 ├── dashboard/
 │   └── app.py
 ├── requirements.txt
-├── .gitignore
-└── README.md
+├── README.md
+└── README_EQUIPO.md
 ```
 
-- **`notebooks/Proyecto_Konzerta_KR.ipynb`:** ejecuta el pipeline y desarrolla las cinco preguntas.
-- **`dashboard/app.py`:** contiene la interfaz y los gráficos interactivos.
-- **`requirements.txt`:** lista las dependencias instalables.
-- **`.gitignore`:** excluye, entre otros, los entornos virtuales y archivos temporales.
-- **`README.md`:** esta documentación.
+**Herramientas:** Python, pandas, openpyxl, Plotly, Streamlit, pathlib, Jupyter/Colab y GitHub. Las dependencias del entorno están definidas en `requirements.txt`.
 
-## 4. Herramientas utilizadas y por qué
+## 7. Instrucciones de reproducción
 
-| Herramienta | Uso real en el proyecto | Justificación |
-|---|---|---|
-| **Python** | Lenguaje del notebook y del dashboard | Permite automatizar el proceso completo |
-| **pandas** | Leer Excel, limpiar, agrupar, resumir y exportar CSV | Simplifica el manejo de tablas |
-| **pathlib** | Construir rutas de carpetas y archivos | Funciona en macOS, Windows y Colab |
-| **re** | Sustituir caracteres y espacios mediante expresiones regulares | Ayuda a normalizar nombres y textos |
-| **unicodedata** | Separar acentos y marcas Unicode en nombres de columnas | Produce nombres consistentes |
-| **Plotly Express** | Gráficos de barras, líneas, dona y otras visualizaciones | Ofrece interacción, zoom y detalles al pasar el cursor |
-| **Streamlit** | Construcción del dashboard, filtros, pestañas, métricas y descargas | Permite publicar una interfaz web usando Python |
-| **openpyxl** | Motor de lectura de archivos Excel usado por pandas | Necesario para trabajar con `.xlsx` |
-| **Jupyter / Colab** | Ejecutar el análisis por celdas | Facilita revisar cada etapa y mostrar evidencias |
-| **Git / GitHub** | Versionar notebook, código y documentación | Permite compartir cambios y recuperar versiones |
-| **Google Drive** | Guardar datos y resultados al ejecutar en Colab | Conserva los archivos fuera de la sesión temporal |
+**Requisito recomendado:** Python 3.10 o superior. Abrir una terminal en la carpeta raíz `Proyecto_Konzerta`.
 
-**Nota:** `pathlib`, `re` y `unicodedata` pertenecen a la biblioteca estándar de Python; no requieren instalación por separado.
-
-## 5. Explicación paso a paso del notebook
-
-### 5.1. Configuración del entorno
-
-La primera celda de código detecta si se ejecuta en Google Colab mediante `"google.colab" in sys.modules`. Si está en Colab, monta Drive y utiliza `/content/drive/MyDrive/Proyecto_Konzerta`. En ejecución local, busca la carpeta `Proyecto_Konzerta` a partir del directorio de trabajo y sus carpetas superiores.
-
-Se definen las rutas `BRONCE`, `PLATA`, `ORO`, `NOTEBOOKS` y `DASHBOARD` con `Path`, y se crean las carpetas necesarias con `mkdir(parents=True, exist_ok=True)`.
-
-**Por qué:** el mismo notebook puede ejecutarse en Mac, Windows y Colab sin cambiar las rutas manualmente, siempre que la estructura de carpetas sea la esperada.
-
-### 5.2. Capa bronce: leer y examinar el archivo
-
-```python
-crudos = pd.read_excel(archivo_excel)
-konzerta = crudos.copy()
-```
-
-- `pd.read_excel()`: carga el Excel a un DataFrame.
-- `copy()`: evita trabajar directamente sobre la tabla original.
-- `shape`, `head()` e `info()`: permiten comprobar tamaño, ejemplos y tipos de datos.
-- `isna().sum()`: cuenta valores faltantes.
-- `duplicated().sum()`: detecta filas repetidas.
-- `describe().T`: resume las variables numéricas.
-
-**Por qué:** antes de modificar datos es necesario saber qué contienen, qué falta y qué valores podrían ser incorrectos.
-
-### 5.3. Capa plata: normalización y limpieza
-
-Se inicia desde `crudos.copy(deep=True)` para que la limpieza sea reproducible.
-
-**a) Normalización de columnas.** La función personalizada `normalizar_columna(nombre)` utiliza `unicodedata.normalize("NFKD", ...)` y `re.sub()` para quitar marcas diacríticas, reemplazar caracteres especiales por guiones bajos y convertir los nombres a minúsculas (`snake_case`). Esto facilita escribir código sin diferencias de acentos o espacios.
-
-**b) Limpieza de textos.** Se usa `astype("string")`, `str.strip()` y `str.replace(r"\s+", " ", regex=True)` para quitar espacios sobrantes; las cadenas vacías se convierten en nulos. El notebook excluye `descripcion` y `url` de esa transformación textual.
-
-**c) Conversión de tipos.** `pd.to_datetime(..., errors="coerce")` interpreta fechas; `pd.to_numeric(..., errors="coerce")` interpreta números. Los valores no interpretables quedan como ausentes en lugar de provocar la interrupción del proceso.
-
-**d) Tratamiento de faltantes.** En `area`, `subarea`, `provincia`, `localidad`, `nivel_laboral` y `modalidad`, los nulos se representan como `Sin dato`. En campos numéricos se conservan los nulos para **no inventar salarios, edades ni vacantes**.
-
-**e) Duplicados.** `drop_duplicates()` elimina únicamente filas idénticas. El notebook también revisa identificadores repetidos durante la exploración inicial.
-
-**f) Revisión salarial.** Se calculan cuartiles (`quantile(0.25)` y `quantile(0.75)`) y el rango intercuartílico (IQR). Se marcan registros con importes inconsistentes o extremos en la nueva columna `estado_salario`, con valores `Sin dato`, `Registro sin alerta` o `Revisar`. **Se conservan los importes; no se borran automáticamente los valores atípicos.**
-
-**g) Bitácora.** La función `registrar(columna, problema, decision, filas_afectadas)` guarda cada decisión de limpieza en una lista, que luego se convierte en un DataFrame. Esto permite explicar qué se modificó y cuántas filas se vieron afectadas.
-
-**h) Verificación.** Se comparan los perfiles antes y después de la limpieza, la cantidad de registros, los tipos y los faltantes. Se comprueba también la presencia de columnas esenciales.
-
-### 5.4. Exportación de plata
-
-El notebook genera:
-
-| Archivo | Contenido |
-|---|---|
-| `konzerta_limpio.csv` | Tabla estandarizada con los anuncios |
-| `bitacora_limpieza.csv` | Problemas detectados y decisiones tomadas |
-| `perfil_bronce.csv` | Tipos y faltantes antes de limpiar |
-| `perfil_plata.csv` | Tipos, faltantes y etiquetas `Sin dato` después de limpiar |
-
-Se usa `to_csv(index=False, encoding="utf-8-sig")` para producir archivos compatibles con herramientas que abren CSV en español.
-
-### 5.5. Análisis exploratorio: las cinco preguntas
-
-**Pregunta 1 — Áreas y subáreas.** `groupby()` agrupa por `area` o por `["area", "subarea"]`. `agg(ofertas=("id","size"), vacantes=("vacantes","sum"))` cuenta anuncios y suma vacantes declaradas. `sort_values()` ordena los resultados y `head(10)` selecciona las categorías más frecuentes. Se calculan porcentajes sobre el total.
-
-**Pregunta 2 — Salarios y experiencia.** Se filtran anuncios con salario máximo positivo y estado `Registro sin alerta`. Luego se seleccionan aquellos con experiencia informada. `pd.cut()` clasifica meses de experiencia en rangos; `groupby().agg()` calcula promedio, mediana, mínimo y máximo salarial. El nivel laboral se analiza por separado. Se utilizan barras y un gráfico de caja en el notebook. **No debe afirmarse que exista una relación salarial generalizable** debido a la pequeña muestra que incluye salario y experiencia simultáneamente.
-
-**Pregunta 3 — Modalidad.** `value_counts()` resume las modalidades. `pd.crosstab(..., normalize="index")` obtiene porcentajes de modalidad dentro de cada área; `melt()` reorganiza los datos para dibujar barras apiladas. Así se comparan proporciones, no solo números absolutos.
-
-**Pregunta 4 — Geografía y nivel laboral.** `groupby()` combina provincia, área y nivel laboral para contar anuncios y comparar ubicaciones. La etiqueta **`Otra` no es una provincia oficial**; si aparece, debe investigarse en la fuente original. El notebook incluye una consulta de registros con ese valor. No se debe cambiar automáticamente por una provincia concreta.
-
-**Pregunta 5 — Evolución semanal.** `pd.to_datetime()` interpreta fechas de publicación; `dt.to_period("W-SUN").dt.start_time` agrupa las semanas comenzando el lunes; `pd.date_range()` y `reindex(fill_value=0)` incluyen semanas sin registros. El código limita el análisis al **16 de octubre de 2026**, fecha documentada en la portada, y marca `semana_parcial` para evitar comparar semanas incompletas como si fueran completas.
-
-## 6. Capa oro: los archivos que alimentan Streamlit
-
-Las seis tablas se crean con `groupby()`, `agg()`, `reset_index()` y `to_csv()`:
-
-| Archivo | Agrupación / contenido | Uso en el dashboard |
-|---|---|---|
-| `oro_areas_subareas.csv` | Área y subárea; ofertas y vacantes | Panorama profesional |
-| `oro_modalidades_area.csv` | Área y modalidad; ofertas | Modalidades de trabajo |
-| `oro_geografia.csv` | Provincia, área y nivel laboral; ofertas y vacantes | Distribución geográfica |
-| `oro_salarios_experiencia.csv` | Rangos de experiencia y estadísticas salariales | Salarios por experiencia |
-| `oro_salarios_nivel.csv` | Nivel laboral y estadísticas salariales | Salarios por nivel |
-| `oro_tendencia_semanal.csv` | Semana de inicio, ofertas y marca de semana parcial | Tendencia temporal |
-
-Al final se ejecutan verificaciones con `assert`: los totales de ofertas de las agregaciones principales deben coincidir con la cantidad de anuncios limpios y los seis archivos deben existir.
-
-**Atención:** estas comprobaciones son parte del código, pero hay que ejecutar el notebook completo para confirmar que pasan con la versión actual del Excel.
-
-## 7. ¿Cómo funciona el dashboard?
-
-El archivo `dashboard/app.py` utiliza:
-
-- **`st.set_page_config()`**: define título, icono y diseño ancho.
-- **`st.cache_data`**: almacena temporalmente los CSV leídos para no recargarlos en cada interacción. La función de lectura recibe también la fecha de modificación del archivo para invalidar la caché cuando cambia.
-- **`st.sidebar.multiselect()`**: filtra áreas y ubicaciones disponibles.
-- **`st.slider()`**: cambia la cantidad de categorías mostradas.
-- **`st.metric()`**: presenta indicadores numéricos.
-- **`st.tabs()`**: organiza las cinco preguntas en secciones.
-- **`px.bar()`, `px.pie()`, `px.line()`**: crean gráficos interactivos.
-- **`st.plotly_chart()`**: muestra gráficos dentro de Streamlit.
-- **`st.expander()` y `st.dataframe()`**: permiten consultar tablas sin saturar la página.
-- **`st.download_button()`**: descarga la tabla de la sección en CSV.
-- **`st.error()`, `st.warning()` y `st.stop()`**: explican archivos faltantes, filtros sin resultados o problemas de lectura.
-
-**Comportamiento de filtros (importante para explicarlo):**
-
-| Sección | Filtro de área | Filtro de ubicación |
-|---|---|---|
-| Panorama | Sí | No |
-| Modalidades | Sí | No |
-| Geografía | Sí | Sí |
-| Salarios | No | No |
-| Tendencia | No | No |
-
-Esto **no es un error de Streamlit**: las tablas oro de salarios y semanas no contienen las columnas `area` ni `provincia`, así que no sería correcto aplicarles esos filtros. Los indicadores del dashboard distinguen explícitamente entre totales por área y totales filtrados por ubicación.
-
-**Limitación de la versión actual:** no se han realizado pruebas funcionales completas del dashboard con los seis CSV reales en Mac y Windows. Los controles y la estructura están implementados, pero deben validarse ejecutando la aplicación.
-
-## 8. Instalación y ejecución
-
-Se recomienda **Python 3.10 o superior**. El entorno virtual `.venv` se crea de forma independiente en cada computadora.
-
-### macOS — Terminal
-
-Desde la carpeta principal `Proyecto_Konzerta`:
+**macOS:**
 
 ```bash
 python3 -m venv .venv
@@ -225,9 +116,7 @@ python -m pip install -r requirements.txt
 python -m streamlit run dashboard/app.py
 ```
 
-### Windows — PowerShell
-
-Desde la misma carpeta del proyecto:
+**Windows (PowerShell):**
 
 ```powershell
 py -m venv .venv
@@ -236,135 +125,36 @@ python -m pip install -r requirements.txt
 python -m streamlit run dashboard/app.py
 ```
 
-Si PowerShell bloquea la activación, se puede ejecutar el intérprete del entorno sin activarlo:
+Si la activación está restringida, utilizar `.\.venv\Scripts\python.exe` en los dos últimos comandos.
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m streamlit run dashboard/app.py
-```
+**Orden de ejecución:** colocar el Excel original en `datos/bronce`; abrir y ejecutar todas las celdas de `notebooks/Proyecto_Konzerta_KR.ipynb` en Jupyter, VS Code o Colab; verificar los CSV generados en `datos/plata` y `datos/oro`; iniciar el dashboard y abrir `http://localhost:8501`.
 
-El dashboard se abre normalmente en **http://localhost:8501**. Para detenerlo, presiona **Ctrl+C** en la terminal.
+En Colab los resultados se guardan en Google Drive; para ejecutar Streamlit en Mac o Windows hay que copiar o sincronizar los seis CSV oro a la carpeta local. GitHub no sincroniza automáticamente los datos generados.
 
-**Antes de ejecutar Streamlit**, asegúrate de que existan los seis CSV en `Proyecto_Konzerta/datos/oro`. Si no existen, primero ejecuta el notebook en orden con Jupyter, VS Code o Colab. En Mac/Windows puedes abrir el notebook desde VS Code con la extensión de Jupyter; `requirements.txt` no instala por sí solo la interfaz de Jupyter.
+**Verificación pendiente:** ejecutar el flujo completo en una instalación limpia, comprobar la actualización tras modificar la fuente y probar filtros y descargas en los sistemas de destino.
 
-### Google Colab y Google Drive
+## 8. Conclusiones y recomendaciones
 
-En Colab, el notebook monta Google Drive y usa:
+La separación en capas facilita la trazabilidad del proceso, conserva el archivo original y permite que las visualizaciones se regeneren a partir de tablas procesadas. Las cinco preguntas ofrecen perspectivas complementarias sobre el archivo de anuncios laborales. Para interpretar correctamente los resultados se debe diferenciar anuncios de vacantes, documentar las fechas de observación y reconocer la limitada cobertura salarial.
 
-```text
-/content/drive/MyDrive/Proyecto_Konzerta/
-```
+Se recomienda completar el diccionario de datos, revisar ubicaciones ambiguas, confirmar la fecha de extracción, agregar interpretaciones verificadas a cada gráfico y demostrar la actualización del dashboard con una nueva ejecución del pipeline.
 
-Allí debe existir `datos/bronce/Konzerta 08-oct-2026.xlsx`. Al ejecutar todas las celdas se generan `datos/plata` y `datos/oro` en Drive.
+## 9. Aprendizajes y dificultades
 
-**Drive no sincroniza automáticamente esos CSV con la carpeta local de GitHub.** Para usar el dashboard en Mac o Windows hay que copiar/sincronizar los seis CSV de `datos/oro` a la carpeta local correspondiente. GitHub versiona el código, pero no ejecuta el pipeline automáticamente.
+**Aspectos técnicos abordados:** lectura y normalización de Excel, tipos de datos, valores faltantes, análisis exploratorio, agregaciones, arquitectura medallón, visualizaciones interactivas y ejecución en varios entornos.
 
-## 9. Guía rápida para explicar el proyecto a otra persona
+**Reflexiones individuales:** cada integrante debe incorporar sus dificultades concretas, decisiones, aprendizajes y mejoras propuestas; no se atribuyen experiencias personales que todavía no se han documentado.
 
-**¿De dónde salen los datos?** Del Excel original de anuncios de Konzerta.
+## 10. Grabación, defensa y entrega
 
-**¿Por qué no graficamos directamente el Excel?** Porque primero verificamos su calidad, estandarizamos valores y documentamos las decisiones de limpieza.
+**Enlace a la grabación colaborativa (mínimo una hora con participación de los tres integrantes):** PENDIENTE DE AÑADIR.
 
-**¿Por qué tres capas?** Para conservar la fuente, separar las transformaciones y alimentar el dashboard con tablas listas para consulta.
+**Presentación:** 7 de noviembre de 2026. Las indicaciones actualizadas señalan una exposición y defensa de **30 minutos**, con demostración en vivo del pipeline y el dashboard.
 
-**¿Qué hace pandas?** Lee el Excel, revisa faltantes y duplicados, transforma fechas y números, agrupa registros y genera los CSV.
+**Entrega:** un ZIP por grupo, con nombre `Rojas_Santimateo_Vergara_Proyecto_IPCD.zip`, que incluya el archivo original, resultados limpios, tablas oro, notebook, dashboard, `requirements.txt` y presentación o documentación requerida. No incluir `.venv`.
 
-**¿Qué hace Plotly?** Convierte las tablas de resultados en gráficos interactivos.
-
-**¿Qué hace Streamlit?** Presenta esos gráficos y permite cambiar filtros, consultar tablas y descargarlas desde una página web.
-
-**¿Cómo se actualiza?** Se reemplaza o actualiza el Excel de origen, se ejecuta el notebook completo, se generan nuevamente las capas plata y oro y se sincronizan los CSV donde corre el dashboard.
-
-**¿Por qué los salarios tienen advertencias?** Porque pocos anuncios informan salario y experiencia al mismo tiempo, y la moneda/periodicidad no están confirmadas de forma homogénea.
-
-**¿Qué significa «Otra» en provincia?** Es un valor presente en la dimensión de ubicación; no es una provincia oficial y requiere revisar la localidad original.
-
-## 10. Limitaciones y puntos pendientes de revisión
-
-1. **Representatividad:** los anuncios del Excel no equivalen a todas las ofertas de empleo de Panamá.
-2. **Salarios:** el notebook documenta 414 anuncios con salario máximo sin alerta y 10 con salario y experiencia, según una ejecución registrada. Estas cantidades pueden variar si cambia la fuente.
-3. **Ubicaciones:** revisar `Otra` y `Sin dato` antes de interpretar un mapa o una comparación provincial.
-4. **Fechas:** confirmar que el 16 de octubre de 2026 sea la fecha de extracción correcta; el nombre del Excel incluye el 8 de octubre.
-5. **Sincronización:** no existe aún una sincronización automática completa Mac/Windows ↔ Drive ↔ GitHub.
-6. **Pruebas:** ejecutar notebook y dashboard con los CSV actuales; comprobar filtros, tablas, descargas y gráficos en macOS y Windows.
-7. **Actualización:** la interfaz muestra datos estáticos del archivo, no información en tiempo real.
-
-## 11. Lista de verificación para la entrega
-
-- [ ] Confirmar que el Excel original está en `datos/bronce`.
-- [ ] Ejecutar el notebook completo, sin errores.
-- [ ] Verificar los cuatro CSV de plata.
-- [ ] Verificar los seis CSV de oro y sus totales.
-- [ ] Comprobar los cinco apartados del dashboard.
-- [ ] Probar filtros y descargas de cada sección.
-- [ ] Revisar la interpretación de `Otra` y las fechas.
-- [ ] Probar instalación y ejecución en los sistemas que usará el equipo.
-- [ ] Documentar capturas de resultados y conclusiones sin generalizaciones indebidas.
+**Criterios del PDF actualizado:** 50 puntos para trabajo entregado y 50 para sustentación. La guía interna del equipo menciona otros valores y duración; para la entrega se siguen las indicaciones más recientes del profesor.
 
 ---
 
-**Resumen en una frase:** el notebook transforma y documenta los datos de Konzerta mediante las capas bronce, plata y oro; el dashboard consume exclusivamente la capa oro para explorar cinco preguntas sobre las ofertas de empleo.
-
-
-## 12. Recomendaciones de cambios a partir de los documentos del equipo
-
-Esta sección distingue **requisitos obligatorios** (PDF actualizado del profesor: `Proyecto final Introducción a la Programación para Ciencia de Datos (1).pdf`) de **recomendaciones de trabajo** (documento `Guia_paso_a_paso_Proyecto_Konzerta_Equipo.docx`, versión 24/10/2026). El objetivo es que cada integrante entienda qué se sugirió, qué se incorporó y qué debe verificarse. **No se atribuyen al profesor requisitos que solo figuran en la guía del compañero.**
-
-### 12.1. Matriz de recomendaciones y estado
-
-| Fuente | Recomendación o requisito | Situación en nuestro proyecto | Acción pendiente |
-|---|---|---|---|
-| Profesor | Conservar el Excel sin modificar en bronce | El notebook lee `datos/bronce` y transforma una copia | Comprobar integridad del archivo en la entrega |
-| Profesor | Normalizar tipos, textos, faltantes, duplicados y atípicos; justificar decisiones | Se implementó limpieza y bitácora de cuatro campos | Revisar si las categorías equivalentes requieren unificación adicional; validar reglas con la fuente |
-| Guía del equipo | Bitácora simplificada de dos columnas: Columna y Justificación | El notebook conserva cuatro columnas, que aportan trazabilidad | Si el equipo desea el formato de la guía, crear una **vista resumida** sin perder el registro detallado. El PDF del profesor exige justificación, pero no impone dos columnas |
-| Profesor | Al menos dos tablas oro y cinco gráficos que cuenten una historia | Hay seis tablas oro y cinco secciones del dashboard | Verificar gráficos, títulos, ejes, unidades e interpretaciones con los CSV reales |
-| Profesor | Dashboard alimentado solo por oro y actualizable al reejecutar el pipeline | Streamlit solo lee oro; el notebook exporta las tablas | Demostrar actualización de datos en el entorno de entrega, sin editar cifras a mano |
-| Guía del equipo | Repartir preguntas en bloques A/B/C, limpiar e integrar entre los tres | Las cinco preguntas están implementadas en un notebook | Acordar responsables, revisión cruzada y comprobar que los tres entienden todas las secciones |
-| Profesor | Diccionario de datos, fuente, fecha y README para ejecutar | Hay diccionario en notebook y guía técnica en README | Confirmar fecha de obtención y trasladar hallazgos, conclusiones y aprendizajes definitivos al material de entrega |
-| Profesor | Grabación colaborativa de al menos una hora, con los tres integrantes, enlazada en README | No se ha verificado la grabación ni su enlace | Grabar, comprobar permisos y añadir URL al README |
-| Profesor | Presentación/defensa de 30 minutos, demostración en vivo y defensa individual | El README explica el funcionamiento, pero no reemplaza el ensayo | Preparar presentación, demostración y respuestas individuales |
-| Profesor | ZIP grupal ejecutable en otra computadora | Existe estructura del proyecto y `requirements.txt` | Probar el ZIP descomprimido en otra ruta y, de ser posible, en Mac y Windows |
-
-### 12.2. Cambios recomendados al notebook y al dashboard
-
-**Prioridad alta — antes de la entrega**
-
-1. **Verificar la ejecución completa:** ejecutar todas las celdas del notebook desde cero, confirmar los cuatro CSV de plata, los seis CSV de oro y las validaciones finales. El código guardado en GitHub no equivale a una ejecución comprobada.
-2. **Validar los datos geográficos:** revisar las filas clasificadas como `Otra` y `Sin dato` antes de interpretar la distribución provincial. No asignar provincias sin evidencia en `localidad`.
-3. **Revisar la fecha de extracción:** el nombre del Excel menciona 08-oct-2026, mientras que la portada consigna 16-oct-2026. Confirmar la fecha válida en los metadatos o en el procedimiento de obtención y ajustar el análisis temporal si corresponde.
-4. **Verificar filtros y descargas del dashboard:** comprobar que cada filtro afecta solo las secciones que pueden calcularse con las dimensiones de oro y que las tablas exportadas coinciden con lo mostrado.
-5. **Revisar la presentación de los gráficos:** todos deben incluir títulos claros, ejes y unidades cuando correspondan, y una interpretación breve basada en resultados realmente observados. Organizar la exposición en contexto → hallazgos → conclusión.
-6. **Comprobar actualización automática:** modificar de manera controlada una copia del Excel de prueba, reejecutar el pipeline y verificar que los CSV oro y el dashboard cambian sin edición manual. Restaurar después los datos originales.
-
-**Prioridad media — mejorar la comprensión y defensa**
-
-7. Añadir al informe o presentación una comparación concreta **antes/después**: dimensiones, tipos, faltantes y ejemplos de normalización, obtenidos de los perfiles bronce y plata.
-8. Explicar por qué se conservan nulos numéricos y por qué los salarios atípicos se marcan para revisión en lugar de eliminarlos automáticamente.
-9. Explicar la diferencia entre **ofertas** (anuncios) y **vacantes** (plazas declaradas), y que la muestra salarial con experiencia es muy pequeña.
-10. Preparar una reflexión personal de cada integrante sobre dificultades, decisiones y aprendizajes, sin inventar resultados de pruebas no realizadas.
-
-### 12.3. Organización sugerida por la guía del compañero
-
-La guía del 24 de octubre propone distribuir el trabajo así, **como sugerencia, no como exigencia del profesor**:
-
-- **Bloque A:** preguntas 1 y 4 — áreas, vacantes, geografía y nivel laboral; revisa el bloque B.
-- **Bloque B:** preguntas 3 y 5 — modalidades y evolución semanal; revisa el bloque C.
-- **Bloque C:** pregunta 2 — salarios y experiencia, además de calidad de datos; revisa el bloque A.
-
-La limpieza inicial, la integración, las pruebas y la preparación de la defensa deben ser colaborativas. La guía propone una **primera versión completa el 28/10/2026**, como fecha interna; el PDF actualizado fija la **presentación para el 07/11/2026**.
-
-### 12.4. Aclaración sobre versiones de los documentos
-
-Para evitar confusiones durante la defensa:
-
-- **Duración de la defensa:** el PDF actualizado del profesor indica **30 minutos**, aunque la guía del equipo mencione 20.
-- **Rúbrica:** el PDF actualizado distribuye **50 puntos para el trabajo y 50 para la sustentación**; la guía del equipo reproduce una distribución diferente. Usar la rúbrica actualizada.
-- **Carpetas:** el PDF actualizado pide explícitamente `datos/bronce`, `datos/plata`, `datos/oro`, `notebooks` y `reporte` o `dashboard`; nuestra estructura sigue ese esquema.
-- **Enlace a la grabación:** el PDF actualizado solicita incluirlo en el **README**. Puede repetirse en la presentación para facilitar el acceso, pero no debe faltar en el README.
-
-### 12.5. Información pendiente para cerrar la documentación
-
-**Enlace a la grabación colaborativa:** pendiente de añadir y verificar.  
-**Hallazgos definitivos:** actualizar con las cifras de la última ejecución validada.  
-**Conclusiones y aprendizajes personales:** completar y revisar entre los tres integrantes.  
-**Evidencia de ejecución multiplataforma y demostración de actualización:** pendiente de documentar.
+**Documentación ampliada:** [README_EQUIPO.md](README_EQUIPO.md), con explicación de funciones, código, decisiones y recomendaciones de cambios basadas en los documentos del equipo.
