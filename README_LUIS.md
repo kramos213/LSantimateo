@@ -1,4 +1,4 @@
-# Manual de aprendizaje para Luis — Python aplicado al análisis de datos
+# Manual de aprendizaje — Python aplicado al análisis de datos
 
 > **Empieza aquí antes de leer las 54 celdas.** Ya sabes Python básico; no necesitas memorizar todas las funciones de pandas. La meta es entender qué recibe cada instrucción, qué produce y por qué la usamos en Konzerta. Los ejemplos de esta sección son didácticos; más abajo encontrarás el código real del notebook, celda por celda.
 
@@ -2042,34 +2042,5 @@ Para evitar confusiones durante la defensa:
 - **Carpetas:** el PDF actualizado pide explícitamente `datos/bronce`, `datos/plata`, `datos/oro`, `notebooks` y `reporte` o `dashboard`; nuestra estructura sigue ese esquema.
 - **Enlace a la grabación:** el PDF actualizado solicita incluirlo en el **README**. Puede repetirse en la presentación para facilitar el acceso, pero no debe faltar en el README.
 
-### 12.5. Información pendiente para cerrar la documentación
-
-**Enlace a la grabación colaborativa:** pendiente de añadir y verificar.  
-**Hallazgos definitivos:** actualizar con las cifras de la última ejecución validada.  
-**Conclusiones y aprendizajes personales:** completar y revisar entre los tres integrantes.  
-**Evidencia de ejecución multiplataforma y demostración de actualización:** pendiente de documentar.
 
 
-## 12. Recomendaciones de cambios basadas en los documentos del equipo y del profesor
-
-Esta sección distingue **requisitos de las indicaciones actualizadas del profesor** y **recomendaciones organizativas de la guía del equipo**. No todos los cambios sugeridos se han aplicado todavía al código.
-
-| Prioridad | Cambio recomendado | Motivo / fuente | Estado a comprobar |
-|---|---|---|---|
-| Alta | Añadir un diccionario de datos con columna, tipo y descripción | Exigencia del profesor para documentar la fuente | No está completo en este README |
-| Alta | Revisar la bitácora de limpieza y su justificación | El profesor exige documentar decisiones sobre nulos, duplicados y atípicos; la guía del equipo recomienda exactamente dos columnas «Columna» y «Justificación» | El notebook exporta cuatro columnas; acordar formato final según el PDF vigente |
-| Alta | Probar el pipeline completo desde una copia limpia en Mac y Windows | La entrega debe reproducirse en otra computadora siguiendo el README | Pendiente de prueba integral |
-| Alta | Confirmar que el dashboard se actualiza tras cambiar el Excel y volver a ejecutar el notebook | Requisito de reporte automático, solo con capa oro | Pendiente de demostración completa |
-| Alta | Incorporar el enlace real a la grabación colaborativa de al menos una hora | Requisito obligatorio de trabajo en grupo; debe participar todo el equipo | Pendiente de proporcionar enlace |
-| Alta | Preparar el PDF de presentación y el ZIP final | Entregables del profesor, además del código | Pendiente |
-| Media | Agregar una o dos líneas de interpretación a cada gráfico y un hilo narrativo de contexto → hallazgos → conclusión | Storytelling de la rúbrica | Revisar en notebook, dashboard y presentación |
-| Media | Confirmar fecha de extracción, volumen y cobertura de variables | Evita contradicciones entre portada, nombre del archivo y resultados | Pendiente de validación |
-| Media | Revisar «Otra» y «Sin dato» como categorías geográficas, sin imputar provincias arbitrariamente | Mejora la calidad e interpretación | Pendiente |
-| Media | Repartir preguntas por bloques y hacer revisión cruzada | Sugerencia de la guía del equipo: A (1 y 4), B (3 y 5), C (2 y calidad) | Organización sugerida, no requisito del profesor |
-| Media | Documentar aprendizajes individuales y preparar la defensa de todo el código | La defensa evalúa dominio individual | Pendiente de cada integrante |
-
-**Advertencia sobre versiones de instrucciones:** la guía de equipo del 24 de octubre menciona una bitácora de dos columnas, una defensa de 20 minutos y una rúbrica 60/40. Sin embargo, el PDF actualizado «Proyecto final Introducción a la Programación para Ciencia de Datos (1).pdf» establece **presentación de 30 minutos** y evaluación **50 puntos trabajo / 50 sustentación**. Para la entrega debe prevalecer el PDF actualizado del profesor y conviene confirmar cualquier contradicción directamente con él.
-
-**Fechas del PDF actualizado:** avance del notebook después del 31 de octubre; revisión del dashboard el 6 de noviembre; presentación y defensa el **7 de noviembre de 2026**. La meta del 28 de octubre mencionada en la guía del equipo es interna, no la fecha oficial de entrega.
-
-**Próximo paso recomendado al equipo:** ejecutar juntos el notebook desde la primera celda, contrastar los CSV exportados con el dashboard, registrar evidencias, completar el diccionario y preparar una defensa en la que cualquiera pueda explicar cada fase.
