@@ -4,7 +4,7 @@
 **Integrantes:** Francia Vergara, Luis Santimateo y Yenia Rojas  
 **Fuente:** conjunto de anuncios de empleo de Konzerta, archivo `Konzerta 08-oct-2026.xlsx`  
 **Presentación prevista:** 7 de noviembre de 2026  
-**Guía técnica para integrantes:** [README_EQUIPO.md](README_EQUIPO.md)
+**Guía técnica para integrantes:** [README_LUIS.md](README_LUIS.md)
 
 ## 1. Resumen del proyecto
 
@@ -98,7 +98,7 @@ Proyecto_Konzerta/
 │   └── app.py
 ├── requirements.txt
 ├── README.md
-└── README_EQUIPO.md
+└── README_LUIS.md
 ```
 
 **Herramientas:** Python, pandas, openpyxl, Plotly, Streamlit, pathlib, Jupyter/Colab y GitHub. Las dependencias del entorno están definidas en `requirements.txt`.
@@ -157,4 +157,4 @@ Se recomienda completar el diccionario de datos, revisar ubicaciones ambiguas, c
 
 ---
 
-**Documentación ampliada:** [README_EQUIPO.md](README_EQUIPO.md), con explicación de funciones, código, decisiones y recomendaciones de cambios basadas en los documentos del equipo.
+**Documentación ampliada:** [README_LUIS.md](README_LUIS.md), con explicación de funciones, código, decisiones y recomendaciones de cambios basadas en los documentos del equipo.
