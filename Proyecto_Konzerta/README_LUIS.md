@@ -1,4 +1,255 @@
-# Guía exhaustiva del notebook — Luis
+# Manual de aprendizaje para Luis — Python aplicado al análisis de datos
+
+> **Empieza aquí antes de leer las 54 celdas.** Ya sabes Python básico; no necesitas memorizar todas las funciones de pandas. La meta es entender qué recibe cada instrucción, qué produce y por qué la usamos en Konzerta. Los ejemplos de esta sección son didácticos; más abajo encontrarás el código real del notebook, celda por celda.
+
+## 0. El mapa mental: solo hay cinco pasos
+
+1. **Abrir** el Excel: obtenemos una tabla llamada `crudos`.
+2. **Limpiar** esa tabla: obtenemos `konzerta`, con nombres y tipos consistentes.
+3. **Contar y resumir**: obtenemos tablas como `tabla_areas` y `resumen_salarios_experiencia`.
+4. **Graficar**: usamos esas tablas para mostrar barras y líneas.
+5. **Guardar**: exportamos CSV a `datos/oro` para el dashboard.
+
+En el notebook las variables se van creando de arriba hacia abajo. Una celda posterior puede utilizar una variable creada en otra anterior. Por eso hay que ejecutar **todas las celdas en orden**.
+
+## 1. No confundas variables, constantes, funciones y métodos
+
+| Lo que ves | Qué es en palabras sencillas | Ejemplo real |
+|---|---|---|
+| `BRONCE` | Variable que guarda una ruta | `BRONCE = PROYECTO / "datos" / "bronce"` |
+| `PROYECTO` | Variable que guarda la carpeta raíz | `Path("/content/drive/MyDrive/Proyecto_Konzerta")` en Colab |
+| `konzerta` | Variable que guarda una tabla de pandas | `konzerta = crudos.copy()` |
+| `total_anuncios` | Variable que guarda un número | `total_anuncios = len(crudos)` |
+| `columnas_numericas` | Variable que guarda una lista | `["vacantes","salario_min",...]` |
+| `registros_bitacora` | Lista que recibe anotaciones | `registros_bitacora = []` |
+| `registrar` | Función creada por el equipo | `def registrar(...):` |
+| `pd.read_excel` | Función de la biblioteca pandas | `pd.read_excel(archivo_excel)` |
+| `.head()` | Método que pertenece a una tabla | `konzerta.head(3)` |
+| `pd.NA` | Valor especial que representa un dato ausente | `.replace("", pd.NA)` |
+| `True` / `False` | Valores booleanos | `archivo_excel.is_file()` |
+
+**¿Por qué algunas variables están en mayúsculas?** Es una *convención* para indicar que su valor se considera fijo durante la ejecución. Python no impide modificar `BRONCE` o `ORO`: **no son constantes protegidas**.
+
+**¿Qué significa el punto?** En `konzerta.head(3)`, el objeto antes del punto es una tabla y `head` es una operación que se le pide a esa tabla. En `pd.read_excel()`, `pd` es el nombre corto que dimos a la biblioteca pandas.
+
+**¿Qué significa `()`?** Normalmente indica que estamos llamando una función o método. Lo que hay dentro son sus argumentos: `head(3)` pide tres filas; `round(2)` pide dos decimales.
+
+**¿Qué significa `[]`?** Depende del contexto: `["area","modalidad"]` crea una lista; `konzerta["area"]` selecciona una columna; `konzerta[condicion]` filtra filas.
+
+## 2. Aprende primero los objetos que usa el proyecto
+
+### 2.1. DataFrame = una tabla
+
+Imagina este ejemplo didáctico:
+
+```python
+import pandas as pd
+
+ejemplo = pd.DataFrame({
+    "area": ["Tecnología", "Ventas", "Tecnología"],
+    "vacantes": [2, 1, 3]
+})
+```
+
+`ejemplo` es una **variable**. `pd.DataFrame(...)` construye una **tabla**. Cada clave del diccionario es el nombre de una columna y cada lista aporta sus valores.
+
+| area | vacantes |
+|---|---:|
+| Tecnología | 2 |
+| Ventas | 1 |
+| Tecnología | 3 |
+
+### 2.2. Series = una columna
+
+```python
+ejemplo["area"]
+```
+
+Esto devuelve una **Series** (una columna), no otra tabla de dos dimensiones.
+
+```python
+ejemplo[["area", "vacantes"]]
+```
+
+Esto devuelve un **DataFrame** con dos columnas. Observa la diferencia entre **un par** y **dos pares** de corchetes.
+
+### 2.3. Agrupar no significa borrar filas del original
+
+```python
+resumen = ejemplo.groupby("area").agg(
+    ofertas=("vacantes", "size"),
+    vacantes=("vacantes", "sum")
+).reset_index()
+```
+
+Resultado:
+
+| area | ofertas | vacantes |
+|---|---:|---:|
+| Tecnología | 2 | 5 |
+| Ventas | 1 | 1 |
+
+**Paso a paso:** `groupby("area")` forma grupos; `size` cuenta las filas de cada grupo; `sum` suma las vacantes; `reset_index()` convierte los nombres de grupos en una columna normal. La tabla `ejemplo` sigue teniendo tres filas; `resumen` es una **tabla nueva** de dos filas.
+
+En el proyecto, esto es crucial: **dos anuncios pueden ofrecer cinco vacantes**. Anuncios y vacantes no son sinónimos.
+
+### 2.4. Filtrar = quedarse con las filas que cumplen una condición
+
+```python
+filtro = ejemplo["vacantes"] > 1
+solo_multiples = ejemplo[filtro]
+```
+
+`filtro` guarda una serie de valores `True` y `False`. `solo_multiples` guarda las filas donde el resultado fue `True`. No elimina filas de `ejemplo`.
+
+Para combinar filtros:
+
+```python
+filtro = (ejemplo["vacantes"] > 1) & (ejemplo["area"] == "Tecnología")
+```
+
+`&` significa **Y**, `|` significa **O** y `==` pregunta si dos valores son iguales. Los paréntesis son importantes para que pandas interprete correctamente las condiciones.
+
+## 3. Variables del notebook: quién es quién
+
+| Nombre | Qué guarda | Cuándo se crea | Para qué sirve |
+|---|---|---|---|
+| `EN_COLAB` | Booleano | Configuración | Decide si se monta Google Drive |
+| `PROYECTO` | Ruta principal | Configuración | Ubicar los archivos |
+| `BRONCE` / `PLATA` / `ORO` | Rutas de carpetas | Configuración | Separar las tres capas |
+| `archivo_excel` | Ruta de un Excel | Lectura | Saber qué archivo abrir |
+| `crudos` | DataFrame original | Lectura | Conservar datos de referencia |
+| `konzerta` | DataFrame de trabajo | Lectura y limpieza | Transformar y analizar anuncios |
+| `perfil_antes` / `perfil_despues` | Tablas de calidad | Limpieza | Comparar tipos y faltantes |
+| `registros_bitacora` | Lista de anotaciones | Limpieza | Guardar decisiones |
+| `bitacora` | DataFrame | Limpieza | Exportar la bitácora |
+| `q1` / `q3` / `iqr` | Números estadísticos | Revisión salarial | Detectar posibles valores extremos |
+| `alerta_salario` | Condiciones booleanas | Revisión salarial | Identificar registros para revisar |
+| `tabla_areas` | DataFrame resumido | Pregunta 1 | Contar anuncios por área |
+| `salarios_validos` | DataFrame filtrado | Pregunta 2 | Analizar salarios sin alerta |
+| `salarios_experiencia` | DataFrame filtrado | Pregunta 2 | Analizar anuncios con salario y experiencia |
+| `tabla_cruzada` | DataFrame de porcentajes | Pregunta 3 | Comparar modalidades por área |
+| `dist_provincia` | DataFrame resumido | Pregunta 4 | Comparar ubicaciones |
+| `tendencia_semanal` | DataFrame resumido | Pregunta 5 | Mostrar ofertas por semana |
+| `tablas_oro` | Diccionario de tablas | Exportación | Guardar los seis CSV |
+
+**No necesitas memorizar los nombres.** Cuando veas uno, busca en esta tabla qué tipo de dato guarda. Pregúntate: «¿Es una ruta, un número, una lista, una condición o una tabla?». Esa pregunta resuelve buena parte de la confusión.
+
+## 4. Las funciones más repetidas, sin tecnicismos innecesarios
+
+| Instrucción | Traducción sencilla | Cuándo la usamos |
+|---|---|---|
+| `pd.read_excel(ruta)` | Abre el Excel | Bronce |
+| `tabla.copy()` | Hace una copia para trabajar | Bronce y plata |
+| `tabla.head(5)` | Muestra cinco filas | Exploración |
+| `tabla.info()` | Muestra columnas y tipos | Diagnóstico |
+| `len(tabla)` | Cuenta filas | Totales |
+| `tabla.isna().sum()` | Cuenta datos faltantes | Calidad |
+| `tabla.duplicated().sum()` | Cuenta filas repetidas | Calidad |
+| `tabla.drop_duplicates()` | Quita filas idénticas | Plata |
+| `tabla["area"].value_counts()` | Cuenta anuncios por categoría | EDA |
+| `tabla.groupby("area")` | Forma grupos por área | EDA y oro |
+| `.agg(...)` | Calcula estadísticas por grupo | EDA y oro |
+| `.reset_index()` | Convierte grupos en columnas | EDA y oro |
+| `.sort_values("ofertas")` | Ordena una tabla | Rankings |
+| `.fillna("Sin dato")` | Sustituye faltantes por una etiqueta | Plata |
+| `pd.to_numeric(...)` | Convierte a número | Plata |
+| `pd.to_datetime(...)` | Convierte a fecha | Plata |
+| `pd.cut(...)` | Crea rangos a partir de números | Experiencia |
+| `pd.crosstab(...)` | Cruza dos categorías | Modalidades |
+| `.melt(...)` | Cambia formato ancho a largo | Gráficos |
+| `px.bar(...)` | Dibuja barras | Visualización |
+| `px.line(...)` | Dibuja líneas | Tendencia |
+| `.to_csv(...)` | Guarda una tabla en CSV | Plata y oro |
+| `assert condicion` | Comprueba que algo sea cierto | Validación |
+
+## 5. Los argumentos que más confunden
+
+- **`axis`:** dirección sobre la que trabaja una operación. No todos los métodos lo usan igual; conviene leer el contexto.
+- **`ascending=False`:** orden descendente, de mayor a menor.
+- **`index=False`:** no guardar la numeración de filas en el CSV.
+- **`dropna=False`:** incluir los grupos con valores nulos en vez de omitirlos.
+- **`errors="coerce"`:** si una conversión falla, registrar el valor como ausente en lugar de detener todo.
+- **`observed=True`:** en una agrupación con categorías, considerar solo las categorías presentes.
+- **`normalize="index"`:** en una tabla cruzada, calcular proporciones dentro de cada fila.
+- **`inplace`:** algunas operaciones permiten modificar directamente un objeto; en este notebook se prefieren asignaciones explícitas.
+- **`encoding="utf-8-sig"`:** forma de guardar texto CSV que facilita su apertura en Excel.
+- **`regex=True`:** indica que el patrón de búsqueda es una expresión regular.
+- **`float("inf")`:** infinito positivo, usado como límite superior del último rango de experiencia.
+- **`pd.NA` / `NaN` / `NaT`:** representan datos ausentes en distintos tipos de datos; no son cadenas de texto.
+
+## 6. Cómo leer el código sin perderte
+
+Cuando encuentres una línea compleja, divídela mentalmente en cuatro preguntas:
+
+**1. ¿Cuál es la entrada?** Por ejemplo, `konzerta` (tabla limpia).
+
+**2. ¿Qué operación hace?** Por ejemplo, `groupby("area")` (agrupar).
+
+**3. ¿Qué sale?** Por ejemplo, `tabla_areas` (otra tabla).
+
+**4. ¿Para qué la necesitamos?** Por ejemplo, responder qué áreas tienen más anuncios.
+
+**Ejemplo con una función creada por nosotros:**
+
+```python
+def registrar(columna, problema, decision, filas_afectadas):
+    registros_bitacora.append({
+        "columna": columna,
+        "problema": problema,
+        "decision": decision,
+        "filas_afectadas": int(filas_afectadas)
+    })
+```
+
+- `def` declara una función llamada `registrar`.
+- Los cuatro nombres entre paréntesis son **parámetros**: información que recibirá cuando la llamemos.
+- `registros_bitacora` es una lista que se creó antes con `[]`.
+- `append()` añade una nueva anotación a esa lista.
+- Las llaves `{}` construyen un diccionario, con nombres de campos y sus valores.
+- `int(filas_afectadas)` garantiza que el conteo quede como número entero.
+- **No tiene `return` porque su propósito es agregar información a la lista, no devolver una tabla.**
+
+Una llamada concreta:
+
+```python
+registrar(
+    "provincia",
+    "Valores faltantes en categorías",
+    "Reemplazar nulos por Sin dato",
+    12
+)
+```
+
+Esto añadiría una anotación de ejemplo indicando que se aplicó una decisión a 12 filas. **El 12 es solo ilustrativo**, no un resultado real de Konzerta.
+
+## 7. Mini ejercicios para comprobar que lo entendiste
+
+**Ejercicio A.** ¿Qué guarda `ORO`: una tabla o una ruta?  
+**Respuesta:** una ruta de carpeta.
+
+**Ejercicio B.** Si hay tres anuncios y cada uno ofrece dos vacantes, ¿cuántas ofertas y vacantes hay?  
+**Respuesta:** tres anuncios y seis vacantes.
+
+**Ejercicio C.** ¿`groupby()` modifica el Excel original?  
+**Respuesta:** no; crea una agrupación para producir un resumen.
+
+**Ejercicio D.** ¿Qué significa `salario_max.isna()`?  
+**Respuesta:** indica, para cada fila, si falta el salario máximo.
+
+**Ejercicio E.** ¿Por qué se usa `copy()`?  
+**Respuesta:** para trabajar con una copia sin alterar la tabla de referencia.
+
+**Ejercicio F.** ¿Por qué el dashboard no lee el Excel?  
+**Respuesta:** porque el diseño del proyecto exige que consuma las tablas preparadas de la capa oro.
+
+---
+
+## A partir de aquí: las 54 celdas del notebook, con código y explicación
+
+Lee primero esta introducción; luego sigue el recorrido detallado de las celdas. Puedes volver al glosario cada vez que aparezca una función o variable desconocida.
+
+# Recorrido técnico completo del notebook
 
 **Archivo explicado:** `notebooks/Proyecto_Konzerta_KR.ipynb` (54 celdas en la versión consultada). Esta guía sigue el **orden real del notebook**; no es código alternativo. Se incluyen las celdas de Python completas para que puedas relacionar cada explicación con las instrucciones exactas.
 
