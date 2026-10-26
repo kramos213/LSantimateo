@@ -98,8 +98,8 @@ with st.sidebar:
     seleccion_prov = st.multiselect("Ubicaciones (solo geografía)", opciones_prov, default=opciones_prov, key="provincias")
     cantidad = st.slider("Mostrar primeras categorías", min_value=5,max_value=20,value=10,key="top")
     st.divider()
-    st.caption("Salarios y evolución temporal son datos generales: sus CSV no contienen provincia ni área.")
-    st.caption("Fuente de datos: seis CSV de datos/oro.")
+    st.caption("Salarios y evolución temporal son datos generales. No se filtran por área ni provincia.")
+    st.caption("El dashboard no realiza predicciones ni generaliza los salarios a todo el mercado laboral.")
 
 af = areas[areas["area"].isin(seleccion_area)].copy()
 mf = modalidades[modalidades["area"].isin(seleccion_area)].copy()
@@ -219,4 +219,4 @@ with tab5:
             exportar(semanas,"tendencia_semanal.csv","exp_semanas")
 
 st.divider()
-st.caption("Proyecto académico · Fuente: Konzerta · El dashboard lee únicamente la capa oro. No se realizan predicciones ni se generalizan los salarios a todo el mercado laboral.")
+st.caption("Proyecto académico · Fuente: Konzerta · El dashboard lee únicamente datos. No se realizan predicciones ni se generalizan los salarios a todo el mercado laboral.")
