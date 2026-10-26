@@ -35,7 +35,7 @@ Después:
 streamlit run dashboard/app.py
 ```
 
-En Google Colab, la primera celda monta Google Drive y utiliza `/content/drive/MyDrive/Proyecto_Konzerta`. Copia allí la estructura del proyecto y el Excel original antes de ejecutar.
+En Google Colab, la celda de preparación monta Google Drive y utiliza `/content/drive/MyDrive/Proyecto_Konzerta`. Copia allí la estructura del proyecto y el Excel original antes de ejecutar.
 
 ## Archivos generados
 
@@ -65,3 +65,18 @@ En Google Colab, la primera celda monta Google Drive y utiliza `/content/drive/M
 `Excel original (bronce) → limpieza + bitácora (plata) → agregaciones (oro) → Streamlit`
 
 El dashboard no accede a bronce ni plata.
+
+## Dashboard interactivo
+
+La aplicación incluye cinco pestañas: panorama profesional, geografía, modalidades, salarios y evolución semanal; filtros por área y ubicación, elección entre anuncios y vacantes donde los datos lo permiten, tamaño del top de categorías, mapa de calor, indicadores y descarga de tablas CSV filtradas.
+
+**Alcance de filtros:** área afecta panorama, modalidades y geografía; ubicación afecta solo geografía. Las tablas agregadas salariales y semanales no contienen área ni provincia y, por tanto, no admiten esos filtros. Los indicadores muestran explícitamente su ámbito. Los valores «Otra» y «Sin dato» en ubicación no son provincias oficiales: se conservan para evitar perder registros hasta verificar las localidades originales.
+
+## Trabajar entre Mac, Colab y Google Drive
+
+- **GitHub:** código fuente, notebook, dashboard y documentación. Actualiza la copia de Mac con Git después de comprobar cambios locales.
+- **Colab / Drive:** al ejecutar el notebook desde Colab, los CSV se escriben en `/content/drive/MyDrive/Proyecto_Konzerta/datos/plata` y `datos/oro`.
+- **Mac:** el dashboard lee exclusivamente `Proyecto_Konzerta/datos/oro`. Copia o sincroniza los seis CSV de Drive a esa carpeta antes de ejecutar Streamlit; no hay sincronización automática entre Drive y Mac incluida en este repositorio.
+- **Precaución:** no ejecutes una copia de archivos sobre un notebook abierto con modificaciones no guardadas. El notebook ya no realiza `git pull` ni sobrescribe su propia copia al iniciar.
+
+**Compatibilidad:** se recomienda Python 3.10 o posterior para el entorno local y las dependencias especificadas en `requirements.txt`.
