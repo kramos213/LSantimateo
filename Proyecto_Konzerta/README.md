@@ -80,3 +80,29 @@ La aplicación incluye cinco pestañas: panorama profesional, geografía, modali
 - **Precaución:** no ejecutes una copia de archivos sobre un notebook abierto con modificaciones no guardadas. El notebook ya no realiza `git pull` ni sobrescribe su propia copia al iniciar.
 
 **Compatibilidad:** se recomienda Python 3.10 o posterior para el entorno local y las dependencias especificadas en `requirements.txt`.
+
+## Compatibilidad macOS y Windows
+
+El código utiliza `pathlib.Path` para localizar `Proyecto_Konzerta/datos/oro` desde `dashboard/app.py`, sin rutas absolutas dependientes del sistema operativo. Ejecuta los comandos desde la carpeta raíz del proyecto.
+
+### macOS (Terminal)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m streamlit run dashboard/app.py
+```
+
+### Windows (PowerShell)
+
+```powershell
+py -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
+python -m pip install -r requirements.txt
+python -m streamlit run dashboard/app.py
+```
+
+Si PowerShell impide activar el entorno, puedes ejecutar directamente `.\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt` y `.\\.venv\\Scripts\\python.exe -m streamlit run dashboard/app.py` sin cambiar la política de ejecución.
+
+En ambos sistemas, abre `http://localhost:8501`. Los seis CSV de la capa oro deben existir en `datos/oro` en la copia local. No copies la carpeta `.venv` entre equipos: crea un entorno independiente en cada sistema. Para ejecutar el notebook localmente utiliza VS Code/Jupyter; la celda de Google Drive solo se activa dentro de Colab.
