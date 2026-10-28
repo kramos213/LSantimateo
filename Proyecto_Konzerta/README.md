@@ -4,7 +4,7 @@
 **Integrantes:** Francia Vergara, Luis Santimateo y Yenia Rojas  
 **Fuente:** conjunto de anuncios de empleo de Konzerta, archivo `Konzerta 08-oct-2026.xlsx`  
 **Presentación prevista:** 7 de noviembre de 2026  
-**Guía técnica para integrantes:** [README_LUIS.md](README_LUIS.md)
+**Guía técnica para integrantes:** [README_LUIS.md](../README_LUIS.md)
 
 ## 1. Resumen del proyecto
 
@@ -149,12 +149,12 @@ Se recomienda completar el diccionario de datos, revisar ubicaciones ambiguas, c
 
 **Enlace a la grabación colaborativa (mínimo una hora con participación de los tres integrantes):** PENDIENTE DE AÑADIR.
 
-**Presentación:** 7 de noviembre de 2026. Las indicaciones actualizadas señalan una exposición y defensa de **30 minutos**, con demostración en vivo del pipeline y el dashboard.
+**Presentación:** 7 de noviembre de 2026. El documento del profesor adjunto establece **20 minutos** para la presentación y defensa, incluyendo demostración en vivo del pipeline y el dashboard.
 
 **Entrega:** un ZIP por grupo, con nombre `Rojas_Santimateo_Vergara_Proyecto_IPCD.zip`, que incluya el archivo original, resultados limpios, tablas oro, notebook, dashboard, `requirements.txt` y presentación o documentación requerida. No incluir `.venv`.
 
-**Criterios del PDF actualizado:** 50 puntos para trabajo entregado y 50 para sustentación. La guía interna del equipo menciona otros valores y duración; para la entrega se siguen las indicaciones más recientes del profesor.
+**Criterios del PDF adjunto:** **60 puntos** para el trabajo entregado y **40 puntos** para la presentación (15 storytelling y conclusiones, 20 demostración y defensa individual, 5 reflexión y aprendizajes). Confirmar con el profesor cualquier cambio posterior a esta guía.
 
 ---
 
-**Documentación ampliada:** [README_LUIS.md](README_LUIS.md), con explicación de funciones, código, decisiones y recomendaciones de cambios basadas en los documentos del equipo.
+**Documentación ampliada:** [README_LUIS.md](../README_LUIS.md), con explicación de funciones, código, decisiones y recomendaciones de cambios basadas en los documentos del equipo.
